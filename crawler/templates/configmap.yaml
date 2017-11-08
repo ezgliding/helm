@@ -5,7 +5,7 @@ metadata:
   labels:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
+    app: {{ template "fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app: {{ template "name" . }}
 data:
-  ezgliding.conf: {{ .Values.config | quote }}
+  crawler-config: {{ .Values.config | quote }}

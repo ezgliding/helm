@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.netcoupe.repository }}:{{ .Values.image.netcoupe.tag }}"
+        imagePullPolicy: {{ default "" .Values.image.pullPolicy | quote }}
+        resources: 
+{{ toYaml .Values.resources | indent 12 }}
+        volumeMounts:
+        - name: crawler-config
+          mountPath: /etc/ezgliding/conf.d
+        - name: crawler-secrets
+          mountPath: /etc/ezgliding/secret.d
+          readOnly: true
+      volumes:
+      - name: crawler-config
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: crawler-config
+            path: crawler.conf
+      - name: crawler-secrets
+        secret:
+          secretName: {{ template "fullname" . }}-secrets
+          items:
+          - key: crawler-secrets
+            path: crawler.conf
